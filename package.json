@@ -7,6 +7,7 @@
     "abi-decoder": "^1.1.0",
     "cli-interact": "^0.1.9",
     "ethereumjs-testrpc": "^6.0.3",
+    "express": "^4.16.3",
     "fs": "0.0.1-security",
     "npm": "^6.3.0",
     "prompt-sync": "^4.1.6",
