@@ -11,8 +11,11 @@ var prompt = require('prompt-sync')();
 var fs = require('fs');
 var sleep = require('system-sleep')
 var express = require('express');
+var bodyParser = require('body-parser');
+
 var app = express();
-port = process.env.PORT || 3000;
+port = process.env.PORT || 6969;
+app.use(bodyParser.json({ type: 'application/json' }));
 
 registrar = "0x6090A6e47849629b7245Dfa1Ca21D94cd15878Ef"
 //----------------------------------------------------------Registrar ABI-------------------------------------------//
@@ -38,11 +41,13 @@ function newensData(){
 
 var ensDataArray = []
 var firstrun = false
-
+var lastBlockNumber = 6082000
 //read the previous file
 try{
 	data = fs.readFileSync('data.json')
-	ensData = JSON.parse(data)
+	data = JSON.parse(data)
+	ensDataArray = data["ensDataArray"]
+	lastBlockNumber = data["lastBlockNumber"]
 }
 catch(error){
 	firstrun = true
@@ -52,9 +57,14 @@ if (firstrun){
 	console.log("First Run Sequence")
 	web3.eth.getBlockNumber(function(err, blockNum){
 		var prevLength = ensDataArray.length
-		processBlocks(registrar, 6084000, blockNum, function(err){
+		processBlocks(registrar, lastBlockNumber, blockNum, function(err){
 			if(!err){
-				console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auctions found")
+				lastBlockNumber = blockNum
+				console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+				fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+				    if (err) console.log(err);
+				    console.log("Successfully Written to File.");
+				});
 				firstrun = false
 			}
 			else{
@@ -64,16 +74,34 @@ if (firstrun){
 	})
 }
 
+setInterval(function(){
+	web3.eth.getBlockNumber(function(err, blockNum){
+		var prevLength = ensDataArray.length
+		processBlocks(registrar, lastBlockNumber, blockNum, function(err){
+			if(!err){
+				lastBlockNumber = blockNum
+				console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+				fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+				    if (err) console.log(err);
+				    console.log("Successfully Written to File.");
+				});
+			}
+			else{
+				console.log("[ERROR] Could not process blocks")
+			}
+		})
+	})
+}, 300000)
 
 //----------------------------------------------------REST API-------------------------------------------------------//
-app.get('/', function (req, res) {
-   // First read existing users.
-   fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-       data = JSON.parse( data );
-       data["user4"] = user["user4"];
-       console.log( data );
-       res.end( JSON.stringify(data));
-   });
+app.post('/', function (req, res) {
+	for(var j=0; j< ensDataArray.length; j++){
+		if(ensDataArray[j]["hash"] == req.body.hash){
+			ensData = newensData()
+			ensData = ensDataArray[j]
+			res.send(JSON.stringify(ensData))
+		}
+	}
 })
 
 app.listen(port);
@@ -90,7 +118,8 @@ Array.prototype.inArray = function(comparer) {
 
 
 //traverse the blockchain for ENS transactions
-function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
+async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
+	console.log("Processing Blocks......")
 	var numBlockProcessed = 0;
 	var ENS_hashes = [] // array if unique ENS hashes
 	var unsealedBids = [] // contains the revealed bid amount, who made the bid and the hash against which the bid was made
@@ -204,7 +233,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 								index = -1
 								break;
 							default:
-								console.log("[WARN] Unidentified contract events found")
+								console.log("[WARN]: Unidentified contract events found")
 						}
 			        }
 			        if(numTxnProcessed == totalTxn){
