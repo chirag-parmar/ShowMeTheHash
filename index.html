@@ -1,7 +1,6 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="style.css">
 	<title>Show Me The Hash</title>
 	<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
@@ -12,25 +11,27 @@
 			<br><br><br>
 			<center><h1>Show Me The Hash</h1></center>
 		</div>
-		<div class="leftColumn">
-		</div>
-		<div id="target" class="feedHost">
-		</div>
-		<div class="leftColumn">
-		</div>
+		 <input type="search" id="mySearch" placeholder="ENS Hash">
+		 <button id= "search" type="button">Click Me!</button> 
 	</div>
 
 	<script>
+		button = document.getElementById('search')
+		button.onclick = function(){
+			searchbox = document.getElementById('mySearch')
+			postrequest	(searchbox.value)
+		}
+
 		var postrequest = function(hash){
 			var http = new XMLHttpRequest();
 			var url = "http://localhost:6969/";
 			var params = '{"hash":"' + hash + '"}';
-			http.open('POST', url, true);
+			http.open('POST', url);
 
 			//Send the proper header information along with the request
 			http.setRequestHeader('Content-Type', 'application/json');
 
-			http.onreadystatechange = function() {//Call a function when the state changes.
+			http.onload = function() {//Call a function when the state changes.
 			    if(http.status == 200) {
 			        console.log(http.responseText);
 			        console.log("working");
@@ -40,9 +41,9 @@
 			    }
 			}
 
-			http.send()
+			http.send(params)
 		}
-		postrequest	('0xc26efb39bc0fd0ad3373b47d09305bc882fb0dd4693a789f8998050e79c97710')
+		
 	</script>
 </body>
 </html>

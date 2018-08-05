@@ -18,9 +18,8 @@ port = process.env.PORT || 6969;
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  // res.header('Access-Contrl-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-  res.send();
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, content-type");
+  next()
 });
 
 registrar = "0x6090A6e47849629b7245Dfa1Ca21D94cd15878Ef"
@@ -72,6 +71,24 @@ if (firstrun){
 				    console.log("Successfully Written to File.");
 				});
 				firstrun = false
+				setInterval(function(){
+					web3.eth.getBlockNumber(function(err, blockNum){
+						var prevLength = ensDataArray.length
+						processBlocks(registrar, lastBlockNumber, blockNum, function(err){
+							if(!err){
+								lastBlockNumber = blockNum
+								console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+								fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+								    if (err) console.log(err);
+								    console.log("Successfully Written to File.");
+								});
+							}
+							else{
+								console.log("[ERROR] Could not process blocks")
+							}
+						})
+					})
+				}, 60000)
 			}
 			else{
 				console.log("[ERROR] Could not process blocks")
@@ -79,25 +96,26 @@ if (firstrun){
 		})
 	})
 }
-
-setInterval(function(){
-	web3.eth.getBlockNumber(function(err, blockNum){
-		var prevLength = ensDataArray.length
-		processBlocks(registrar, lastBlockNumber, blockNum, function(err){
-			if(!err){
-				lastBlockNumber = blockNum
-				console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
-				fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
-				    if (err) console.log(err);
-				    console.log("Successfully Written to File.");
-				});
-			}
-			else{
-				console.log("[ERROR] Could not process blocks")
-			}
+else{
+	setInterval(function(){
+		web3.eth.getBlockNumber(function(err, blockNum){
+			var prevLength = ensDataArray.length
+			processBlocks(registrar, lastBlockNumber, blockNum, function(err){
+				if(!err){
+					lastBlockNumber = blockNum
+					console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+					fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+					    if (err) console.log(err);
+					    console.log("Successfully Written to File.");
+					});
+				}
+				else{
+					console.log("[ERROR] Could not process blocks")
+				}
+			})
 		})
-	})
-}, 60000)
+	}, 60000)
+}
 
 //----------------------------------------------------REST API-------------------------------------------------------//
 app.post('/', function (req, res) {
@@ -105,7 +123,7 @@ app.post('/', function (req, res) {
 		if(ensDataArray[j]["hash"] == req.body.hash){
 			ensData = newensData()
 			ensData = ensDataArray[j]
-			res.send(JSON.stringify(ensData))
+			res.json(ensData)
 		}
 	}
 })
@@ -114,14 +132,6 @@ app.listen(port);
 console.log("Server started on " + port.toString())
 
 //----------------------------------------------------Helper Functions-----------------------------------------------//
-//check if unique
-Array.prototype.inArray = function(comparer) { 
-    for(var i=0; i < this.length; i++) { 
-        if(comparer == this[i]) return true; 
-    }
-    return false; 
-}; 
-
 
 //traverse the blockchain for ENS transactions
 function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
@@ -133,7 +143,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
   	referring to the account address*/
   	for (var i = startBlockNumber; i <= endBlockNumber; i++) {
 	    var block = web3.eth.getBlock(i, true, function(err, block){
-	    	if (block != null || block.transactions != null || !err) {
+	    	if (!err) {
 	    		var numTxnProcessed = 0;
 	    		var totalTxn = block.transactions.length
 
