@@ -16,7 +16,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "node getAuctionInfo.js"
+    "test": "node getAuctionInfo.js",
+    "start": "node getAuctionInfo.js"
   },
   "author": "Chirag Mahaveer Parmar",
   "license": "ISC"
