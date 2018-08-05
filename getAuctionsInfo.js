@@ -118,7 +118,7 @@ Array.prototype.inArray = function(comparer) {
 
 
 //traverse the blockchain for ENS transactions
-async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
+function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 	console.log("Processing Blocks......")
 	var numBlockProcessed = 0;
 	var ENS_hashes = [] // array if unique ENS hashes
