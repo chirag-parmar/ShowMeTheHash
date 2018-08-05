@@ -1,23 +1,23 @@
 {
-  "name": "ens-inspect",
+  "name": "eth-dev",
   "version": "1.0.0",
-  "description": "finds out the unsealed bid amounts, who made them and the hash against which they were made via a user interface. ",
+  "description": "scrapes ethereum blockchain for ENS data",
   "main": "getAuctionsInfo.js",
   "dependencies": {
     "abi-decoder": "^1.1.0",
-    "cli-interact": "^0.1.9",
-    "ethereumjs-testrpc": "^6.0.3",
+    "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "fs": "0.0.1-security",
-    "npm": "^6.3.0",
     "prompt-sync": "^4.1.6",
-    "system-sleep": "^1.3.6",
     "web3": "^1.0.0-beta.35"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node ./getAuctionInfo.js"
+    "start": "node getAuctionsInfo.js"
   },
+  "keywords": [
+    "ethereum"
+  ],
   "author": "Chirag Mahaveer Parmar",
   "license": "ISC"
 }
