@@ -127,7 +127,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
   	referring to the account address*/
   	for (var i = startBlockNumber; i <= endBlockNumber; i++) {
 	    var block = web3.eth.getBlock(i, true, function(err, block){
-	    	if (!err) {
+	    	if (block != null || block.transactions != null || !err) {
 	    		var numTxnProcessed = 0;
 	    		var totalTxn = block.transactions.length
 
@@ -154,10 +154,12 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 									ensData = newensData()
 									ensData["events"]["revealedBids"].push(unsealInfo)
 									ensData["hash"] = params[0]["value"]
+									ensData["events"]["started"] = true
 									ensDataArray[index] = ensData
 								}
 								else{
 									ensDataArray[index]["events"]["revealedBids"].push(unsealInfo)
+									ensDataArray[index]["events"]["started"] = true
 								}
 								index = -1
 								break;
