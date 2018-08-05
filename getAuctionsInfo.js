@@ -19,7 +19,8 @@ app.use(bodyParser.json({ type: 'application/json' }));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
+  // res.header('Access-Contrl-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+  res.send();
 });
 
 registrar = "0x6090A6e47849629b7245Dfa1Ca21D94cd15878Ef"
@@ -96,7 +97,7 @@ setInterval(function(){
 			}
 		})
 	})
-}, 300000)
+}, 60000)
 
 //----------------------------------------------------REST API-------------------------------------------------------//
 app.post('/', function (req, res) {
