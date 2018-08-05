@@ -13,8 +13,14 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 var app = express();
+
 port = process.env.PORT || 6969;
 app.use(bodyParser.json({ type: 'application/json' }));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 registrar = "0x6090A6e47849629b7245Dfa1Ca21D94cd15878Ef"
 //----------------------------------------------------------Registrar ABI-------------------------------------------//
@@ -217,6 +223,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 								}
 								else{
 									ensDataArray[index]["events"]["finalized"] = true
+									ensDataArray[index]["owner"] = e.from
 								}
 								index = -1
 								break;
@@ -224,6 +231,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 								index = checkUniqueness(params[0]["value"])
 								if(index == ensDataArray.length){
 									ensData = newensData()
+									ensData["owner"] = e.from
 									ensData["events"]["released"] = true
 									ensData["hash"] = params[0]["value"]
 									ensDataArray[index] = ensData

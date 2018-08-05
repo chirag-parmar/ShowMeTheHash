@@ -1,0 +1,49 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Show Me The Hash</title>
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+
+<body>
+	<div class="blended_grid">
+		<div class="topBanner" id="topBanner">
+			<br><br><br>
+			<center><h1>Show Me The Hash</h1></center>
+		</div>
+		<div class="leftColumn">
+		</div>
+		<div id="target" class="feedHost">
+		</div>
+		<div class="leftColumn">
+		</div>
+	</div>
+
+	<script>
+		var postrequest = function(hash){
+			var http = new XMLHttpRequest();
+			var url = "https://showmethehash.herokuapp.com";
+			var params = '{"hash":"' + hash + '"}';
+			http.open('POST', url, true);
+
+			//Send the proper header information along with the request
+			http.setRequestHeader('Content-type', 'application/json');
+			http.setRequestHeader('Access-Control-Allow-Origin', '*');
+			http.withCredentials = false;
+
+			http.onreadystatechange = function() {//Call a function when the state changes.
+			    if(http.readyState == 4 && http.status == 200) {
+			        console.log(http.responseText);
+			    }
+			    else{
+			    	console.log("lol")
+			    }
+			}
+
+			http.send()
+		}
+		postrequest	('0xc26efb39bc0fd0ad3373b47d09305bc882fb0dd4693a789f8998050e79c97710')
+	</script>
+</body>
+</html>
