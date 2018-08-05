@@ -9,7 +9,6 @@ var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v
 const abiDecoder = require('abi-decoder');
 var prompt = require('prompt-sync')();
 var fs = require('fs');
-var sleep = require('system-sleep')
 var express = require('express');
 var bodyParser = require('body-parser');
 
