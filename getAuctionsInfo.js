@@ -5,14 +5,13 @@
 */
 
 var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/107c7b12d9004f8d81a50a88a27b8042"))
 const abiDecoder = require('abi-decoder');
-var prompt = require('prompt-sync')();
 var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
 
 var app = express();
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/107c7b12d9004f8d81a50a88a27b8042"))
 
 port = process.env.PORT || 6969;
 app.use(bodyParser.json({ type: 'application/json' }));
@@ -306,7 +305,7 @@ function highestBidder(array){
 		}
 	}
 
-	return (array[i]['from'])
+	return (array[pos]['from'])
 }
 
 //delay function
