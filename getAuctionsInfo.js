@@ -298,14 +298,19 @@ function checkUniqueness(hash){
 function highestBidder(array){
 	max = 0
 	pos = 0
-	for(var i=0; i<array.length; i++){
-		if(array[i]['bidAmount'] > max){
-			max = array[i]['bidAmount']
-			pos = i
+	if(array.length > 0){
+		for(var i=0; i<array.length; i++){
+			if(array[i]['bidAmount'] > max){
+				max = array[i]['bidAmount']
+				pos = i
+			}
 		}
-	}
 
-	return (array[pos]['from'])
+		return (array[pos]['from'])
+	}
+	else{
+		return ('')
+	}
 }
 
 //delay function
