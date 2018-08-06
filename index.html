@@ -9,15 +9,31 @@
 		body{
 			background-color: #000000
 		}
+		h1{
+		    padding: 0px;
+		    margin: 0px;
+		}
+		h2{
+		    padding: 0px;
+		    margin: 0px;
+		}
+		h3{
+		    padding: 0px;
+		    margin: 0px;
+		}
+		h4{
+		    padding: 0px;
+		    margin: 0px;
+		}
 		.topBanner h1{
 			font-family: 'Permanent Marker', cursive;
   			font-size: 48px;
+  			padding: 15px 0px;
+  			margin: 15px 0px;
   			color: white;
 		}
 		.searchField{
 			width:80%;
-  			left: 10%;
-  			position: absolute;
 		}
 		.searchField input[type=search] {
 		  padding: 15px;
@@ -43,6 +59,13 @@
 		.searchField button:hover {
 		  background: #bbb;
 		}
+
+		.results {
+			width:80%;
+			left:11%;
+			position: absolute;
+		}
+
 	</style>
 </head>
 
@@ -51,10 +74,13 @@
 		<div class="topBanner" id="topBanner">
 			<center><h1>Show Me The Hash</h1></center>
 		</div>
-		<div class='searchField'>
+		<center><div class='searchField'>
 			<input type="search" id="mySearch" placeholder="ENS Hash">
 			<button id= "search" type="button">Search</button>
-		</div> 
+		</div></center>
+		<br><br><br>
+		<div class ='results' id='results'>
+		</div>
 	</div>
 
 	<script>
@@ -62,6 +88,71 @@
 		button.onclick = function(){
 			searchbox = document.getElementById('mySearch')
 			postrequest	(searchbox.value)
+		}
+
+		var createItem = function(ensData)	{
+			var innerDiv = document.createElement('div')
+			innerDiv.className = 'feedItem'
+			innerDiv.style.backgroundColor = '#3a3a3a'
+			innerDiv.style.float = 'none'
+			innerDiv.style.clear = 'both'
+			innerDiv.style.height = 'auto'
+			innerDiv.style.width = '97%'
+			innerDiv.style.fontFamily = "Righteous,cursive"
+			innerDiv.style.color = 'white'
+
+			var hash = document.createElement('h2')
+			var owner = document.createElement('h3')
+			var started = document.createElement('h4')
+			var transferred = document.createElement('h4')
+			var released = document.createElement('h4')
+			var finalized = document.createElement('h4')
+
+			hash.append("Hash: " + ensData['hash'])
+			if(ensData['owner']!= ''){
+				owner.append("Owner: " + ensData['owner'])
+			}
+			else{
+				owner.append("Owner: Unknown")
+			}
+			if(ensData['events']['started']){
+				started.append('Started: Yes')
+			}
+			else{
+				started.append('Started: No/(unknown)')
+			}
+			if(ensData['events']['finalized']){
+				finalized.append('Finalized: Yes')
+			}
+			else{
+				finalized.append('Finalized: No/(unknown)')
+			}
+			if(ensData['events']['transferred']){
+				tranferred.append('Trasferred: Yes')
+			}
+			else{
+				transferred.append('Transferred: No/(unknown)')
+			}
+			if(ensData['events']['released']){
+				released.append('Released Deed: Yes')
+			}
+			else{
+				released.append('Released Deed: No/(unknown)')
+			}
+			// fileName.append("Filename: " + data["fileName"])
+			// amount.append("Amount: " + data["amount"])
+			// description.append(data["description"])
+			// innerDiv.append(fileName);
+			innerDiv.append(hash);
+			innerDiv.append(owner);
+			innerDiv.append(started);
+			innerDiv.append(finalized);
+			innerDiv.append(transferred);
+			innerDiv.append(released);
+			// innerDiv.append(description)
+			// innerDiv.append(amount);
+			// innerDiv.append(button);
+			return innerDiv
 		}
 
 		var postrequest = function(hash){
@@ -74,9 +165,14 @@
 			http.setRequestHeader('Content-Type', 'application/json');
 
 			http.onload = function() {//Call a function when the state changes.
-			    if(http.status == 200) {
-			        console.log(http.responseText);
-			        console.log("working");
+			    if(http.readyState==4 && http.status == 200) {
+			    	ensData = JSON.parse(http.responseText)
+			    	item = createItem(ensData)
+			    	results = document.getElementById('results')
+					while (results.hasChildNodes()) {
+					    results.removeChild(results.lastChild);
+					}
+			    	results.append(item)
 			    }
 			    else{
 			    	console.log(http.status)

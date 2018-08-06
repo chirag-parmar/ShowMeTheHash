@@ -126,6 +126,7 @@ app.post('/', function (req, res) {
 			res.json(ensData)
 		}
 	}
+	res.json(404,'')
 })
 
 app.listen(port);
