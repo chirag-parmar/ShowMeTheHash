@@ -143,7 +143,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
   	referring to the account address*/
   	for (var i = startBlockNumber; i <= endBlockNumber; i++) {
 	    var block = web3.eth.getBlock(i, true, function(err, block){
-	    	if (!err) {
+	    	if (block!=null && block.transactions !=null && !err) {
 	    		var numTxnProcessed = 0;
 	    		var totalTxn = block.transactions.length
 

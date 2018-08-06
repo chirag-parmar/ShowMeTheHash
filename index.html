@@ -3,16 +3,58 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Show Me The Hash</title>
 	<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet"> 
+	<style>
+		/* Style the search field */
+		body{
+			background-color: #000000
+		}
+		.topBanner h1{
+			font-family: 'Permanent Marker', cursive;
+  			font-size: 48px;
+  			color: white;
+		}
+		.searchField{
+			width:80%;
+  			left: 10%;
+  			position: absolute;
+		}
+		.searchField input[type=search] {
+		  padding: 15px;
+		  font-size: 17px;
+		  border: none;
+		  float: left;
+		  width: 80%;
+		  color: white;
+		  background: #3a3a3a;
+		}
+
+		/* Style the submit button */
+		.searchField button {
+		  float: left;
+		  width: 20%;
+		  padding: 15px;
+		  background: #ddd;
+		  font-size: 17px;
+		  border: none;
+		  cursor: pointer;
+		}
+
+		.searchField button:hover {
+		  background: #bbb;
+		}
+	</style>
 </head>
 
 <body>
 	<div class="blended_grid">
 		<div class="topBanner" id="topBanner">
-			<br><br><br>
 			<center><h1>Show Me The Hash</h1></center>
 		</div>
-		 <input type="search" id="mySearch" placeholder="ENS Hash">
-		 <button id= "search" type="button">Click Me!</button> 
+		<div class='searchField'>
+			<input type="search" id="mySearch" placeholder="ENS Hash">
+			<button id= "search" type="button">Search</button>
+		</div> 
 	</div>
 
 	<script>
@@ -24,7 +66,7 @@
 
 		var postrequest = function(hash){
 			var http = new XMLHttpRequest();
-			var url = "http://localhost:6969/";
+			var url = "http://showmethehash.herokuapp.com/";
 			var params = '{"hash":"' + hash + '"}';
 			http.open('POST', url);
 
