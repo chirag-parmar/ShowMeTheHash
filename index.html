@@ -10,20 +10,28 @@
 			background-color: #000000
 		}
 		h1{
-		    padding: 0px;
-		    margin: 0px;
+		    padding: 0px 15px;
+		    margin: 0px 15px;
 		}
 		h2{
-		    padding: 0px;
-		    margin: 0px;
+		    padding: 0px 15px;
+		    margin: 0px 0px;
+		    background: #ffffff;
+		    color: #000000;
+		    word-wrap: break-word;
 		}
 		h3{
-		    padding: 0px;
-		    margin: 0px;
+		    padding: 0px 15px;
+		    margin: 0px 15px;
+		    word-wrap: break-word;
 		}
 		h4{
-		    padding: 0px;
-		    margin: 0px;
+		    padding: 0px 15px;
+		    margin: 0px 15px;
+		}
+		p{
+		    padding: 0px 30px;
+		    margin: 0px 30px;
 		}
 		.topBanner h1{
 			font-family: 'Permanent Marker', cursive;
@@ -78,7 +86,7 @@
 			<input type="search" id="mySearch" placeholder="ENS Hash">
 			<button id= "search" type="button">Search</button>
 		</div></center>
-		<br><br><br>
+		<br><br><br><br>
 		<div class ='results' id='results'>
 		</div>
 	</div>
@@ -100,6 +108,7 @@
 			innerDiv.style.width = '97%'
 			innerDiv.style.fontFamily = "Righteous,cursive"
 			innerDiv.style.color = 'white'
+			innerDiv.style.borderRadius= '25px';
 
 			var hash = document.createElement('h2')
 			var owner = document.createElement('h3')
@@ -113,7 +122,10 @@
 				owner.append("Owner: " + ensData['owner'])
 			}
 			else{
-				owner.append("Owner: Unknown")
+				if(ensData['events']['finalized'] == true && ensData['events']['started'] == true){
+					var maxBidder = highestBidder(ensData['events']['revealedBids'])
+					owner.append("Owner: " + maxBidder)
+				}
 			}
 			if(ensData['events']['started']){
 				started.append('Started: Yes')
@@ -139,25 +151,40 @@
 			else{
 				released.append('Released Deed: No/(unknown)')
 			}
-			// fileName.append("Filename: " + data["fileName"])
-			// amount.append("Amount: " + data["amount"])
-			// description.append(data["description"])
-			// innerDiv.append(fileName);
+			
+
+			var bids = ensData['events']['revealedBids']
+
 			innerDiv.append(hash);
 			innerDiv.append(owner);
 			innerDiv.append(started);
 			innerDiv.append(finalized);
 			innerDiv.append(transferred);
 			innerDiv.append(released);
-			// innerDiv.append(description)
-			// innerDiv.append(amount);
-			// innerDiv.append(button);
+			var revealed_title = document.createElement('h4')
+				var lineBreak = document.createElement('br')
+				innerDiv.append(lineBreak)
+				revealed_title.append("Revealed Bids")
+				innerDiv.append(revealed_title)
+			if(bids.length != 0){
+				for(var i=0; i<bids.length; i++){
+					var revealed = document.createElement('p')
+					revealed.append("ENS bid of " + (parseInt(bids[i]['bidAmount'])/1000000000000000000) + " Ether revealed by " + bids[i]['from'])
+					innerDiv.append(revealed);
+				}
+			}
+			else{
+				var revealed = document.createElement('p')
+				revealed.append("0 Bids Revealed")
+				innerDiv.append(revealed)
+			}
+
 			return innerDiv
 		}
 
 		var postrequest = function(hash){
 			var http = new XMLHttpRequest();
-			var url = "http://showmethehash.herokuapp.com/";
+			var url = "http://localhost:6969/";
 			var params = '{"hash":"' + hash + '"}';
 			http.open('POST', url);
 
@@ -180,6 +207,19 @@
 			}
 
 			http.send(params)
+		}
+
+		function highestBidder(array){
+			max = 0
+			pos = 0
+			for(var i=0; i<array.length; i++){
+				if(array[i]['bidAmount'] > max){
+					max = array[i]['bidAmount']
+					pos = i
+				}
+			}
+
+			return (array[pos]['from'])
 		}
 		
 	</script>

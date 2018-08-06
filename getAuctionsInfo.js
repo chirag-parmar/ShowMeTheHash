@@ -46,7 +46,7 @@ function newensData(){
 
 var ensDataArray = []
 var firstrun = false
-var lastBlockNumber = 6082000
+var lastBlockNumber = 6060000
 //read the previous file
 try{
 	data = fs.readFileSync('data.json')
@@ -135,11 +135,12 @@ console.log("Server started on " + port.toString())
 //----------------------------------------------------Helper Functions-----------------------------------------------//
 
 //traverse the blockchain for ENS transactions
-function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
+async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 	console.log("Processing Blocks......")
 	var numBlockProcessed = 0;
 	var ENS_hashes = [] // array if unique ENS hashes
 	var unsealedBids = [] // contains the revealed bid amount, who made the bid and the hash against which the bid was made
+
 	/*go through every block from start to end and filter out the transactions 
   	referring to the account address*/
   	for (var i = startBlockNumber; i <= endBlockNumber; i++) {
@@ -162,6 +163,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 						var params = inputData["params"]
 						var index = -1
 
+						//process different kinds of auction events
 						switch(name){
 							case 'unsealBid':
 								unsealInfo["from"] = e.from
@@ -235,7 +237,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 								}
 								else{
 									ensDataArray[index]["events"]["finalized"] = true
-									ensDataArray[index]["owner"] = e.from
+									ensDataArray[index]["owner"] = highestBidder(ensData['events']['revealedBids'])
 								}
 								index = -1
 								break;
@@ -250,6 +252,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 								}
 								else{
 									ensDataArray[index]["events"]["released"] = true
+									ensDataArray[index]["owner"] = e.from
 								}
 								index = -1
 								break;
@@ -265,7 +268,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 			        }
 			    });
 			    if(totalTxn == 0){
-			    	console.log("[OBS]: block without transactions")
+			    	console.log("[OBS]: block " + block.number + " without transactions")
 			    	numBlockProcessed++
 			    	if(numBlockProcessed > (endBlockNumber-startBlockNumber)){
 		        		callback(0)
@@ -280,6 +283,7 @@ function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 		        }
 		    }
 	    })
+		await sleep(100) //to ensure that getBlock requests are not overlapping too much
   	}
 }
 
@@ -290,4 +294,22 @@ function checkUniqueness(hash){
 		}
 	}
 	return (ensDataArray.length)
+}
+
+function highestBidder(array){
+	max = 0
+	pos = 0
+	for(var i=0; i<array.length; i++){
+		if(array[i]['bidAmount'] > max){
+			max = array[i]['bidAmount']
+			pos = i
+		}
+	}
+
+	return (array[i]['from'])
+}
+
+//delay function
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
