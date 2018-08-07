@@ -265,7 +265,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 		        }
 		    }
 	    })
-		await sleep(50) //to ensure that getBlock requests are not overlapping too much
+		await sleep(100) //to ensure that getBlock requests are not overlapping too much
   	}
 }
 
