@@ -57,64 +57,45 @@ catch(error){
 	firstrun = true
 }
 
+
 if (firstrun){
 	console.log("First Run Sequence")
-	web3.eth.getBlockNumber(function(err, blockNum){
-		var prevLength = ensDataArray.length
-		processBlocks(registrar, lastBlockNumber, blockNum, function(err){
-			if(!err){
-				lastBlockNumber = blockNum
-				console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
-				fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
-				    if (err) console.log(err);
-				    console.log("Successfully Written to File.");
-				});
-				firstrun = false
-				setInterval(function(){
-					web3.eth.getBlockNumber(function(err, blockNum){
-						var prevLength = ensDataArray.length
-						processBlocks(registrar, lastBlockNumber, blockNum, function(err){
-							if(!err){
-								lastBlockNumber = blockNum
-								console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
-								fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
-								    if (err) console.log(err);
-								    console.log("Successfully Written to File.");
-								});
-							}
-							else{
-								console.log("[ERROR] Could not process blocks")
-							}
-						})
+}
+web3.eth.getBlockNumber(function(err, blockNum){
+	var prevLength = ensDataArray.length
+	processBlocks(registrar, lastBlockNumber, blockNum, function(err){
+		if(!err){
+			lastBlockNumber = blockNum
+			console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+			fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+			    if (err) console.log(err);
+			    console.log("Successfully Written to File.");
+			});
+			firstrun = false
+			setInterval(function(){
+				web3.eth.getBlockNumber(function(err, blockNum){
+					var prevLength = ensDataArray.length
+					processBlocks(registrar, lastBlockNumber, blockNum, function(err){
+						if(!err){
+							lastBlockNumber = blockNum
+							console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
+							fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
+							    if (err) console.log(err);
+							    console.log("Successfully Written to File.");
+							});
+						}
+						else{
+							console.log("[ERROR] Could not process blocks")
+						}
 					})
-				}, 60000)
-			}
-			else{
-				console.log("[ERROR] Could not process blocks")
-			}
-		})
+				})
+			}, 300000)
+		}
+		else{
+			console.log("[ERROR] Could not process blocks")
+		}
 	})
-}
-else{
-	setInterval(function(){
-		web3.eth.getBlockNumber(function(err, blockNum){
-			var prevLength = ensDataArray.length
-			processBlocks(registrar, lastBlockNumber, blockNum, function(err){
-				if(!err){
-					lastBlockNumber = blockNum
-					console.log("Block Processing Complete - " + (ensDataArray.length - prevLength).toString() + " unique auction(s) found")
-					fs.writeFile('data.json', JSON.stringify({ensDataArray, "lastBlockNumber": lastBlockNumber}), 'utf8', function(err, data){
-					    if (err) console.log(err);
-					    console.log("Successfully Written to File.");
-					});
-				}
-				else{
-					console.log("[ERROR] Could not process blocks")
-				}
-			})
-		})
-	}, 60000)
-}
+})
 
 //----------------------------------------------------REST API-------------------------------------------------------//
 app.post('/', function (req, res) {
@@ -176,8 +157,10 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 									ensDataArray[index] = ensData
 								}
 								else{
-									ensDataArray[index]["events"]["revealedBids"].push(unsealInfo)
-									ensDataArray[index]["events"]["started"] = true
+									if(checkUniquenessUnseal(unsealInfo, ensDataArray[index]["events"]["revealedBids"])){
+										ensDataArray[index]["events"]["revealedBids"].push(unsealInfo)
+										ensDataArray[index]["events"]["started"] = true
+									}
 								}
 								index = -1
 								break;
@@ -282,7 +265,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 		        }
 		    }
 	    })
-		await sleep(100) //to ensure that getBlock requests are not overlapping too much
+		await sleep(50) //to ensure that getBlock requests are not overlapping too much
   	}
 }
 
@@ -293,6 +276,20 @@ function checkUniqueness(hash){
 		}
 	}
 	return (ensDataArray.length)
+}
+
+function checkUniquenessUnseal(unsealInfo, arrayInfo){
+	if(arrayInfo.length > 0){
+		for(var i=0; i<arrayInfo.length; i++){
+			if(unsealInfo['from'] == arrayInfo[i]["from"] && unsealInfo['bidAmount'] == arrayInfo[i]['bidAmount']){
+				return (false)
+			}
+		}
+		return (true)
+	}
+	else{
+		return (true)
+	}
 }
 
 function highestBidder(array){
