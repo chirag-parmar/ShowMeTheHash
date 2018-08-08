@@ -138,10 +138,15 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 
 		      		/*check if the to address matches with the account*/
 			        if (myaccount == e.to) {
-						var inputData = abiDecoder.decodeMethod(e.input)
-						var name = inputData["name"]
-						var params = inputData["params"]
-						var index = -1
+						try{
+							var inputData = abiDecoder.decodeMethod(e.input)
+							var name = inputData["name"]
+							var params = inputData["params"]
+							var index = -1
+						}
+						catch{
+							console.log("error reading input data")
+						}
 
 						//process different kinds of auction events
 						switch(name){
