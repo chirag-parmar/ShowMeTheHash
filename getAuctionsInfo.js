@@ -144,7 +144,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 							var params = inputData["params"]
 							var index = -1
 						}
-						catch{
+						catch(error){
 							console.log("error reading input data")
 						}
 
