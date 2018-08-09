@@ -1,11 +1,12 @@
-/* Author: Chirag Mahaveer Parmar 
-   Website: https://www.chiragparmar.me
-   GitHub: chirag-parmar
-   LinkedIn: https://www.linkedin.com/in/chirag-parmar
+/** 
+*Author: Chirag Mahaveer Parmar 
+*Website: https://www.chiragparmar.me
+*GitHub: chirag-parmar
+*LinkedIn: https://www.linkedin.com/in/chirag-parmar
 */
 
 var Web3 = require('web3');
-const abiDecoder = require('abi-decoder');
+const abiDecoder = require('abi-decoder'); 
 var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -27,7 +28,8 @@ const registrarABI = [{"constant":false,"inputs":[{"name":"_hash","type":"bytes3
 abiDecoder.addABI(registrarABI);
 
 // ----------------------------------------- MAIN SEQUENCE ----------------------------------------------//
-//mimic structures of c++
+
+//mimic structures of c++ - ADT
 function newensData(){
 	var ensData = {
 		"hash": '',
@@ -43,9 +45,11 @@ function newensData(){
 	return ensData
 }
 
+// Global variables - ensDataArray is shared among functions 
 var ensDataArray = []
 var firstrun = false
 var lastBlockNumber = 6060000
+
 //read the previous file
 try{
 	data = fs.readFileSync('data.json')
@@ -58,6 +62,7 @@ catch(error){
 }
 
 
+//check if it is the first run, if yes then process all blocks startng from the last block to the current block
 if (firstrun){
 	console.log("First Run Sequence")
 }
@@ -72,6 +77,7 @@ web3.eth.getBlockNumber(function(err, blockNum){
 			    console.log("Successfully Written to File.");
 			});
 			firstrun = false
+			//After all blocks have been processed trigger the processBlocks funtion eery 5 minutes
 			setInterval(function(){
 				web3.eth.getBlockNumber(function(err, blockNum){
 					var prevLength = ensDataArray.length
@@ -114,7 +120,15 @@ console.log("Server started on " + port.toString())
 
 //----------------------------------------------------Helper Functions-----------------------------------------------//
 
-//traverse the blockchain for ENS transactions
+/**
+*This function processes all blocks from the start number to the end number
+*for ENS transactions to a particular account
+*@param myaccount specifies the account to look for while processing blocks 
+*@param startBlockNumber The block number to start processing from 
+*@param endBlockNumber The block number to end processing at
+*@callback callback function with error code indicating successfull processing and otherwise
+*/
+
 async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callback) {
 	console.log("Processing Blocks......")
 	var numBlockProcessed = 0;
@@ -122,7 +136,8 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 	var unsealedBids = [] // contains the revealed bid amount, who made the bid and the hash against which the bid was made
 
 	/*go through every block from start to end and filter out the transactions 
-  	referring to the account address*/
+  	*referring to the account address
+  	*/
   	for (var i = startBlockNumber; i <= endBlockNumber; i++) {
 	    var block = web3.eth.getBlock(i, true, function(err, block){
 	    	if (block!=null && block.transactions !=null && !err) {
@@ -274,6 +289,12 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
   	}
 }
 
+/**
+*This checks if a record of the particular hash already exists in the Data Array
+*@param hash hash of the ENS domain
+*@return index of the pre-existing record, if no pre-existing record index 
+*        for the creation of new record
+*/
 function checkUniqueness(hash){
 	for(var i=0; i<ensDataArray.length; i++){
 		if(hash == ensDataArray[i]["hash"]){
@@ -283,6 +304,12 @@ function checkUniqueness(hash){
 	return (ensDataArray.length)
 }
 
+/**
+*This checks if a record of the unsealBid event already exists in the hash record
+*@param unsealInfo the unsealBid event record {'from':<address>,'bidAmount':<value>}
+*@param arrayInfo the array which contains all other unsealBid event records
+*@return true if the record doesn't exist. false if the record exists
+*/
 function checkUniquenessUnseal(unsealInfo, arrayInfo){
 	if(arrayInfo.length > 0){
 		for(var i=0; i<arrayInfo.length; i++){
@@ -297,6 +324,11 @@ function checkUniquenessUnseal(unsealInfo, arrayInfo){
 	}
 }
 
+/**
+*This finds out the highest bidder among an array of revealed bids
+*@param array the array of unsealBid records. Found at ensDataArray['events']['revealedBids']
+*@return the address of the highest bidder
+*/
 function highestBidder(array){
 	max = 0
 	pos = 0
@@ -315,7 +347,9 @@ function highestBidder(array){
 	}
 }
 
-//delay function
+/**
+*Sleep/Delay function to put a momentary delay before the next block is fetched
+*/
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
