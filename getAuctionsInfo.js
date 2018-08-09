@@ -5,6 +5,15 @@
 *LinkedIn: https://www.linkedin.com/in/chirag-parmar
 */
 
+/*
+*For Noobs
+*1. npm install
+*2. npm start
+*3. Wait for blocks to be processed
+*4. open index.html
+*5. search for the hash
+*/
+
 var Web3 = require('web3');
 const abiDecoder = require('abi-decoder'); 
 var fs = require('fs');
