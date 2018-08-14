@@ -137,7 +137,7 @@ app.post('/monitor', function (req, res) {
 //get request to get the details of the monitor auction
 app.get('/monitor', function (req, res) {
 	for(var j=0; j< ensDataArray.length; j++){
-		if(ensDataArray[j]["hash"] == monitor){
+		if(ensDataArray[j]["hash"] == monitorhash){
 			ensData = newensData()
 			ensData = ensDataArray[j]
 			res.json(ensData)
