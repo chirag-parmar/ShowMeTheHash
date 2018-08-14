@@ -113,6 +113,10 @@ web3.eth.getBlockNumber(function(err, blockNum){
 })
 
 //----------------------------------------------------REST API-------------------------------------------------------//
+//global variable to store the hash of the auction to be monitored.
+var monitorhash = ''
+
+//post request to get details about any auction
 app.post('/', function (req, res) {
 	for(var j=0; j< ensDataArray.length; j++){
 		if(ensDataArray[j]["hash"] == req.body.hash){
@@ -121,7 +125,25 @@ app.post('/', function (req, res) {
 			res.json(ensData)
 		}
 	}
-	res.json(404,'')
+	res.send(404,'')
+})
+
+//post request to set the monitor auction
+app.post('/monitor', function (req, res) {
+	monitorhash = req.body.hash
+	res.send(200,'')
+})
+
+//get request to get the details of the monitor auction
+app.get('/monitor', function (req, res) {
+	for(var j=0; j< ensDataArray.length; j++){
+		if(ensDataArray[j]["hash"] == monitor){
+			ensData = newensData()
+			ensData = ensDataArray[j]
+			res.json(ensData)
+		}
+	}
+	res.send(404,'')
 })
 
 app.listen(port);
@@ -248,7 +270,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 								}
 								else{
 									ensDataArray[index]["events"]["finalized"] = true
-									ensDataArray[index]["owner"] = highestBidder(ensData['events']['revealedBids'])
+									ensDataArray[index]["owner"] = highestBidder(ensDataArray[index]['events']['revealedBids'])
 								}
 								index = -1
 								break;
@@ -268,7 +290,7 @@ async function processBlocks(myaccount, startBlockNumber, endBlockNumber, callba
 								index = -1
 								break;
 							default:
-								console.log("[WARN]: Unidentified contract events found")
+								console.log("[WARN]: Unidentified contract events found " + name)
 						}
 			        }
 			        if(numTxnProcessed == totalTxn){
